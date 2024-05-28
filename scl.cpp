@@ -1,8 +1,7 @@
-hoan
 #include<iostream>
 #include<iomanip>
 #include<cstring>
-//#include<fstream>
+#include<fstream>
 using namespace std;
 class KH{
     public:
@@ -11,20 +10,15 @@ class KH{
     int san,tgian,nsan,tsan,nds,msan;
     void nhap();
     void hienthi();
-void soluong();
+    void soluong();
 };
-void KH::nhap() {
+void KH::nhap(){
     cin.ignore(1);
-
-    cout << "\nNhap ho va ten: ";
-    cin.getline(hoten, 20);
-
-    cout << "\nNhap so dien thoai: ";
-    cin.getline(sdt, 20);
-
+    cout<<"\n nhap ho va ten:";cin.getline(hoten,20);fflush(stdin);
+    cout<<"\n nhap so dien thoai: ";cin.getline(sdt,20);fflush(stdin);
+    
     cout << "\nNhap ma san: ";
     cin >> msan;
-
     while (true) {
         cout << "\nNhap so san (co tong cong 5 san lan luot tu 1->5): ";
         cin >> san;
@@ -67,7 +61,9 @@ class quanli: public KH{
     int n,m;
     int cau,sl,sluong,vot;
     string di;
-    char san_status[31][5][5]; 
+    char San[31][5][5]; 
+    int hang = 50;
+    int hcau,hsl,hsluong,hvot;
     void nhap();
     void hienthi();
     void themtt();
@@ -75,18 +71,48 @@ class quanli: public KH{
     void suatt();
     void dichvu();
     void ttsan();
- void capNhatTrangThaiSan(int, int, int, int);
-    void hienThiTrangThaiSan(int);
+    void capnhatsan(int, int, int, int);
+    void hienthisan(int);
     quanli();
- KH* timkiemKhachHang(const char* sdt); 
- void thongke();
+    KH* timkhach(const char* sdt); 
+    void thongke();
+    void xuatfile();
+    void kiemtrakho();
+    void xcns(int, int, int, int);
+    void xs(int, int, int, int);
 };
+void quanli::xs(int ngay, int san, int tgbd, int tgt){
+     for(int i=tgbd-16;i<(tgbd-16+tgt+1);++i){
+        San[ngay-1][san-1][i]= ' ';
+    };
+}
+void quanli::xuatfile() {
+    ofstream outfile("khachhang.txt");
+    if (outfile.is_open()) {
+        outfile << "\n Ho ten" << setw(20) << "so dien thoai" << setw(10)
+                << "ma san" << setw(5) << "san" << setw(15) << "thoi gian thue" << setw(15)
+                << "gio nhan" << setw(15) << "gio tra" << setw(15) << "ngay dat san" << endl;
+        for (int i = 0; i < n; i++) {
+            outfile << endl << "" << setw(10) << kh[i].hoten;
+            outfile << "" << setw(11) << kh[i].sdt << setw(11) << kh[i].msan;
+            outfile << "" << setw(10) << kh[i].san << setw(15) << kh[i].tgian << setw(15) << kh[i].nsan;
+            int tsan = kh[i].tgian + kh[i].nsan;
+            outfile << "" << setw(15) << tsan << setw(15) << kh[i].nds;
+        }
+        outfile.close();
+        cout << "Da xuat thong tin khach hang ra file khachhang.txt." << endl;
+    } else {
+        cout << "Khong the mo file de ghi." << endl;
+    }
+}
 void quanli::thongke(){
     int X,V;
     int U=0;
+    int H=0;
     for (int i=0;i<n;i++){
         cout<<"Tien san "<<kh[i].san<<": "<<kh[i].tgian*700<<" nghin dong"<<endl;
         V=kh[i].tgian*700;
+        H=H+V;
         }; 
         if (di == "co"){
         for(int i=0;i<n;i++){
@@ -96,19 +122,17 @@ void quanli::thongke(){
         cout<<"Tien nuoc ngot: "<<sl*15<<" nghin dong"<<endl;
         cout<<"Tien nuoc khoang: "<<sluong*7<<" nghin dong"<<endl;
        X=cau*10+vot*50+sl*15+sluong*7;
-       U=U+X+V;
-    } 
-}
-    else{
+       U=U+X+H;
+    } }else{
         X=0;
-        U=U+X+V;
+        U=U+X+H;
     };
     cout<<"Tong doanh thu thang nay la: "<<U<<" nghin dong"<<endl;
 }
 
-KH* quanli::timkiemKhachHang(const char* sdt) {
+KH* quanli::timkhach(const char* sdt) {
     for (int i = 0; i < n; ++i) {
-        if (strcmp(kh[i].sdt, sdt) == 0) { //so sanh hai ki tu
+        if (strcmp(kh[i].sdt, sdt) == 0) {
             return &kh[i]; 
         }
     }
@@ -116,21 +140,91 @@ KH* quanli::timkiemKhachHang(const char* sdt) {
 }
 
 quanli::quanli() {
-    memset(san_status, ' ', sizeof(san_status)); 
+    memset(San, ' ', sizeof(San));
+    hcau = hvot = hsl = hsluong = hang; 
 }
 
-void quanli::capNhatTrangThaiSan(int day, int san, int start, int duration) {
-    for (int i = start - 16; i < (start - 16 + duration + 1); ++i) {
-        san_status[day - 1][san - 1][i] = 'X';
-    }
-}
-void quanli::hienThiTrangThaiSan(int day) {
-    cout << "\nTrang thai cac san ngay " << day << " (16h-20h):" << endl;
+void quanli::capnhatsan(int ngay, int san, int tgbd, int tgt) {
+    for (int i = tgbd - 16; i < (tgbd - 16 + tgt + 1); ++i) {
+        San[ngay - 1][san - 1][i] = 'X';
+    }}
+void quanli::xcns(int ngay, int san, int tgbd, int tgt){
+    for (int i=0;i<n;i++){
+        for (int j=i+1;j<n;j++){
+    if(kh[i].nsan == kh[j].nsan){
+        if(kh[i].tsan < kh[j].tsan){
+        for (int i= tgbd-16+2;i<(tgbd-16+tgt+1);++i){
+        San[ngay-1][san-1][i] = ' ';
+        };
+    }else{
+        break;
+    };
+    break;
+    };
+    if (kh[i].tsan == kh[j].nsan){
+    for (int i = tgbd - 16; i < (tgbd - 16 + tgt + 1); ++i){
+        San[ngay - 1][san - 1][i+1]= ' ';
+    };
+    break;
+    };
+    if (kh[i].nsan == kh[j].tsan){
+        for (int i = tgbd - 16; i < (tgbd-16+tgt);++i){
+            San[ngay - 1][san - 1][i] = ' ';
+        };
+        break;
+    };
+     if(kh[i].nsan + 1 == kh[j].nsan){
+        if(kh[i].tsan<kh[j].tsan){
+            for (int i= tgbd-16+2;i<(tgbd-16+tgt+1);++i){
+                San[ngay-1][san-1][i]= ' ';
+            };
+        }else {
+            break;
+        };
+        break;
+};
+ if(kh[i].tsan == kh[j].tsan){
+    for(int i=tgbd-16;i<(kh[i].nsan-kh[j].nsan);++i){
+        San[ngay-1][san-1][i] = ' ';
+    };
+    break;
+ };
+ if(kh[i].nsan-1==kh[j].nsan){
+    for(int i=tgbd-16;i<(tgbd-16+tgt+1);++i){
+        San[ngay-1][san-1][i]= ' ';
+    };
+    for (int i=(kh[i].nsan-16);i<(kh[i].tsan-16+1);++i){
+        San[ngay-1][san-1][i]= 'X';
+    };
+    break;
+ };
+ if(kh[j].tsan - 1 == kh[i].nsan){
+    for(int i=tgbd-16;i<(tgbd-16+tgt+1);++i){
+        San[ngay-1][san-1][i]= ' ';
+    };
+    for (int i=(kh[i].nsan-16);i<(kh[i].tsan-16+1);++i){
+        San[ngay-1][san-1][i]= 'X';
+    };
+    break;
+ };
+if(kh[i].tsan - 1 == kh[j].nsan){
+    for(int i=tgbd-16;i<(tgbd-16+tgt+1);++i){
+        San[ngay-1][san-1][i]= ' ';
+    };
+    for (int i=(kh[i].nsan-16);i<(kh[i].tsan-16+1);++i){
+        San[ngay-1][san-1][i]= 'X';
+    };
+    break;
+};
+ }
+    }};
+void quanli::hienthisan(int ngay) {
+    cout << "\nTinh trang cac san ngay " << ngay << " (16h-20h):" << endl;
     cout << "       16h 17h 18h 19h 20h" << endl;
     for (int i = 0; i < 5; ++i) {
         cout << "San " << i + 1 << "  ";
         for (int j = 0; j < 5; ++j) {
-            cout << san_status[day - 1][i][j] << "   ";
+            cout << San[ngay - 1][i][j] << "   ";
         }
         cout << endl;
     }
@@ -140,7 +234,7 @@ void quanli::nhap(){
    haha: for (int i=0;i<n;i++){
         cout<<"\n nhap khach hang thu:"<<i+1<<"";
         kh[i].nhap();
-        capNhatTrangThaiSan(kh[i].nds ,kh[i].san, kh[i].nsan, kh[i].tgian);
+        capnhatsan(kh[i].nds ,kh[i].san, kh[i].nsan, kh[i].tgian);
     };
     for (int i=0;i<n;i++){
         for (int j=i+1;j<n;j++){
@@ -156,8 +250,7 @@ void quanli::nhap(){
         for (int j=i+1;j<n;j++){
             if (kh[i].nds == kh[j].nds){
                 if (kh[i].san == kh[j].san){
-                    if((kh[i].nsan == kh[j].nsan)|| (kh[i].tsan == kh[j].nsan)||(kh[i].nsan == kh[j].tsan) ||(kh[i].tsan - 1 == kh[j].nsan)|| (kh[i].nsan + 1 == kh[j].nsan)){
-                        cout<<"San da duoc dat vui long nhap lai"<<endl;
+                 if((kh[i].nsan == kh[j].nsan)or (kh[i].tsan == kh[j].nsan)or(kh[i].nsan == kh[j].tsan)or (kh[j].tsan - 1 == kh[i].nsan)or (kh[j].nsan + 1 == kh[i].nsan) or (kh[i].tsan - 1 == kh[j].nsan)or (kh[i].nsan + 1 == kh[j].nsan)){
                         goto haha;
                     }else{
                         break;
@@ -191,15 +284,15 @@ cout<<"Nuoc khoang: "<<sluong;
     }
     void quanli::themtt(){
         cout<<" ban da chon them thong tin. Vui long nhap:"<<endl;
-        kh[n].nhap();
-        capNhatTrangThaiSan(kh[n].nds, kh[n].san, kh[n].nsan, kh[n].tgian);
+         kh[n].nhap();
+        capnhatsan(kh[n].nds, kh[n].san, kh[n].nsan, kh[n].tgian);
         n++;
         for (int i=0;i<n;i++){
         for (int j=i+1;j<n;j++){
             if (kh[i].msan == kh[j].msan) {
                 cout<<"Ma san bi trung. Vui long nhap lai"<<endl;
                 kh[n-1].nhap();
-                capNhatTrangThaiSan(kh[n-1].nds, kh[n - 1].san, kh[n - 1].nsan, kh[n - 1].tgian);
+                capnhatsan(kh[n-1].nds, kh[n - 1].san, kh[n - 1].nsan, kh[n - 1].tgian);
             }
             else {
                 break;
@@ -209,10 +302,11 @@ cout<<"Nuoc khoang: "<<sluong;
         for (int j=i+1;j<n;j++){
             if (kh[i].nds == kh[j].nds){
                 if (kh[i].san == kh[j].san){
-                    if((kh[i].nsan == kh[j].nsan)or (kh[i].tsan == kh[j].nsan)or(kh[i].nsan == kh[j].tsan) or (kh[i].tsan - 1 == kh[j].nsan)or (kh[i].nsan + 1 == kh[j].nsan)){
+                    if((kh[i].nsan == kh[j].nsan)or (kh[i].tsan == kh[j].nsan)or(kh[i].nsan == kh[j].tsan)or (kh[j].tsan - 1 == kh[i].nsan)or (kh[j].nsan + 1 == kh[i].nsan) or (kh[i].tsan - 1 == kh[j].nsan)or (kh[i].nsan + 1 == kh[j].nsan)){
                         cout<<"San da duoc dat vui long nhap lai"<<endl;
-                        kh[n-1].nhap();
-                capNhatTrangThaiSan(kh[n-1].nds, kh[n - 1].san, kh[n - 1].nsan, kh[n - 1].tgian);
+                         xcns(kh[n-1].nds, kh[n-1].san, kh[n-1].nsan, kh[n-1].tgian);
+                         kh[n-1].nhap();
+                         capnhatsan(kh[n-1].nds, kh[n-1].san, kh[n-1].nsan, kh[n-1].tgian);
                     }else{
                         break;
                     }
@@ -237,6 +331,7 @@ cout<<"Nuoc khoang: "<<sluong;
         }
     }
     if (index != -1) {
+         xs(kh[index].nds, kh[index].san, kh[index].nsan, kh[index].tgian);
         for (int i = index; i < n - 1; ++i) {
             kh[i] = kh[i + 1];
         }
@@ -260,7 +355,7 @@ void quanli::suatt() {
     if (index != -1) {
         cout << "Nhap thong tin moi cho khach hang:" << endl;
         kh[index].nhap();
-        capNhatTrangThaiSan(kh[index].nds, kh[index].san, kh[index].nsan, kh[index].tgian);
+        capnhatsan(kh[index].nds, kh[index].san, kh[index].nsan, kh[index].tgian);
         cout << "Thong tin khach hang voi ma san " << msan << " da duoc cap nhat." << endl;
     } else {
         cout << "Khong tim thay khach hang voi ma san " << msan << "." << endl;
@@ -279,8 +374,9 @@ void quanli::suatt() {
         for (int j=i+1;j<n;j++){
             if (kh[i].nds == kh[j].nds){
                 if (kh[i].san == kh[j].san){
-                    if((kh[i].nsan == kh[j].nsan)or (kh[i].tsan == kh[j].nsan)or(kh[i].nsan == kh[j].tsan) or (kh[i].tsan - 1 == kh[j].nsan)or (kh[i].nsan + 1 == kh[j].nsan)){
+                    if((kh[i].nsan == kh[j].nsan)or (kh[i].tsan == kh[j].nsan)or(kh[i].nsan == kh[j].tsan)or (kh[j].tsan - 1 == kh[i].nsan)or (kh[j].nsan + 1 == kh[i].nsan) or (kh[i].tsan - 1 == kh[j].nsan)or (kh[i].nsan + 1 == kh[j].nsan)){
                         cout<<"San da duoc dat vui long nhap lai"<<endl;
+                        xcns(kh[index].nds, kh[index].san, kh[index].nsan, kh[index].tgian);
                         goto huhu;
                     }else{
                         break;
@@ -305,10 +401,24 @@ for (int i=0;i<n;i++) {
     cout<<"nhap ma san cua khach hang: ";
     hehe:cin>>msan;
     if (kh[i].msan == msan) {
-        cout<<"Nhap so luong cau khach hang muon thue: ";
-        cin>>cau;cout<<endl;
-        cout<<"Nhap so luong vot khach hang muon thue: ";
-        cin>>vot;cout<<endl;
+       h: cout<<"Nhap so luong cau khach hang muon thue: ";
+        cin>>cau;
+        if (cau > hcau){
+            cout<<"Khong con du cau cho khach thue."<<"Chi con lai "<<hcau<<"qua cau"<<" Hay lay so luong it hon";
+            goto h;
+        } else  {
+            hcau= hcau - cau;
+        };
+        cout<<endl;
+       k: cout<<"Nhap so luong vot khach hang muon thue: ";
+        cin>>vot;
+         if (vot > hvot){
+            cout<<"Khong con du vot cho khach thue."<<"Chi con lai "<<hvot<<"vot"<<" Hay lay so luong it hon";
+            goto k;
+        } else  {
+            hvot= hvot - vot;
+        };
+        cout<<endl;
         cout<<"Khach hang muon chon do uong: "<<endl;
         cout<<"1. Nuoc khoang"<<endl;
         cout<<"2. Nuoc ngot"<<endl;
@@ -317,18 +427,42 @@ for (int i=0;i<n;i++) {
         cin>>douong;
         switch(douong){
         case 1:
-            cout<<"Nhap so luong: ";
+          j:  cout<<"Nhap so luong: ";
             cin>>sluong;
+             if (sluong > hsluong){
+            cout<<"Khong con du nuoc khoang."<<"Chi con lai "<<hsluong<<"chai nuoc khoang "<<" Hay lay so luong it hon";
+            goto j;
+        } else  {
+            hsluong= hsluong - sluong;
+        };
             break;
         case 2:
-            cout<<"Nhap so luong: ";
+           p: cout<<"Nhap so luong: ";
             cin>>sl;
+                if (sl > hsl){
+            cout<<"Khong con du nuoc ngot."<<"Chi con lai "<<hsl<<"chai nuoc ngot "<<" Hay lay so luong it hon";
+            goto p;
+        } else  {
+            hsl= hsl - sl;
+        };
             break;
         case 3:
-        cout<<"Nhap so luong nuoc khoang: ";
+       t: cout<<"Nhap so luong nuoc khoang: ";
         cin>>sluong;
-        cout<<"Nhap so luong nuoc ngot: ";
+             if (sluong > hsluong){
+            cout<<"Khong con du nuoc khoang."<<"Chi con lai "<<hsluong<<"chai nuoc khoang "<<" Hay lay so luong it hon";
+            goto t;
+        } else  {
+            hsluong= hsluong - sluong;
+        };
+       w: cout<<"Nhap so luong nuoc ngot: ";
         cin>>sl;
+              if (sl > hsl){
+            cout<<"Khong con du nuoc ngot."<<"Chi con lai "<<hsl<<"chai nuoc ngot "<<" Hay lay so luong it hon";
+            goto w;
+        } else  {
+            hsl= hsl - sl;
+        };
         break;
         case 0:
         break;
@@ -339,6 +473,32 @@ for (int i=0;i<n;i++) {
     goto hehe;
 }}
 }}
+void quanli::kiemtrakho(){
+    string m;
+    int j,k,l,s;
+    cout<<"Kho luu tru cua Vu tru badminton"<<endl;
+    cout<<"So luong cau trong kho: "<<hcau<<endl;
+    cout<<"So luong vot trong kho: "<<hvot<<endl;
+    cout<<"So luong nuoc ngot trong kho: "<<hsl<<endl;
+    cout<<"So luong nuoc khoang trong kho: "<<hsluong<<endl;
+    cout<<"Ban co muon nhap them hang vao kho khong"<<endl;
+    cin>>m;
+    if (m == "co"){
+        cout<<"Nhap so luong cau muon them: ";cin>>j;cout<<endl;
+        hcau=hcau+j;
+        cout<<"Nhap so luong vot muon them: ";cin>>k;cout<<endl;
+        hvot=hvot+k;
+        cout<<"Nhap so luong nuoc ngot muon them: ";cin>>l;cout<<endl;
+        hsl=hsl+l;
+        cout<<"Nhap so luong nuoc khoang muon them: ";cin>>s;cout<<endl;
+        hsluong=hsluong+s;
+        cout<<"Kho luu tru cua vu tru badminton sau khi nhap them hang"<<endl;
+        cout<<"So luong cau trong kho: "<<hcau<<endl;
+        cout<<"So luong vot trong kho: "<<hvot<<endl;
+        cout<<"So luong nuoc ngot trong kho: "<<hsl<<endl;
+        cout<<"So luong nuoc khoang trong kho: "<<hsluong<<endl;
+    }
+}
 void menu(){
     cout<<endl<<"==========================================================="<<"\n";
     cout<<"chao mung ban den voi Vu tru badminton. Ban muon"<<endl;
@@ -352,10 +512,12 @@ void menu(){
     cout<<"7. Thong ke doanh thu"<<endl;
     cout<<"8. Them dich vu cho khach hang"<<endl;
     cout<<"9. Tim kiem khach hang"<<endl;
+    cout<<"10. Xuat file thong tin khach hang"<<endl;
+    cout<<"11. Kiem tra kho luu tru"<<endl;
     cout<<"0. Thoat"<<endl;  
 }
 int main(){
-int day,g,msan;
+int ngay,g,msan;
 string h;
 quanli s1;
         while(true){
@@ -373,39 +535,42 @@ quanli s1;
             break;
             case 3:
             s1.themtt();
+             system("pause");
             break;
             case 4:
             s1.suatt();
+             system("pause");
             break;
             case 5:
             s1.xoatt();
-break;
-case 6:
-cout<<"Nhap ngay de xem tinh trang san: ";
-cin>>day;
-cout<<endl;
-s1.hienThiTrangThaiSan(day);
-system("pause");
-break;
-case 7:
-s1.thongke();
-system("pause");
-break;
-        case 8:
-        s1.dichvu();
-        break;
-        case 9:
+             system("pause");
+            break;
+            case 6:
+            cout<<"Nhap ngay de xem tinh trang san: ";
+            cin>>ngay;
+            cout<<endl;
+            s1.hienthisan(ngay);
+            system("pause");
+            break;
+            case 7:
+            s1.thongke();
+            system("pause");
+            break;
+            case 8:
+            s1.dichvu();
+            break;
+            case 9:
         {
                 char sdt[20];
                 cout << "Nhap so dien thoai khach hang muon tim: ";
                 cin.ignore();
                 cin.getline(sdt, 20);
-                KH* khachhang = s1.timkiemKhachHang(sdt);
+                KH* khachhang = s1.timkhach(sdt);
                 if (khachhang) {
                     cout << "Khach hang tim thay:\n";
                     cout<<"\n Ho ten"<<setw(20)<<"so dien thoai"<<setw(10);
-    cout<<"ma san"<<setw(5)<<"san"<<setw(15)<<"thoi gian thue"<<setw(15);
-    cout<<"gio nhan"<<setw(15)<<"gio tra"<<setw(15)<<"ngay dat san";
+                    cout<<"ma san"<<setw(5)<<"san"<<setw(15)<<"thoi gian thue"<<setw(15);
+                    cout<<"gio nhan"<<setw(15)<<"gio tra"<<setw(15)<<"ngay dat san";
                     khachhang->hienthi();
                     cout << endl;
                 } else {
@@ -414,7 +579,15 @@ break;
                 system("pause");
                 break;
             }
-        case 0:
+            case 10:
+            s1.xuatfile();
+            system("pause");
+            break;
+            case 11:
+            s1.kiemtrakho();
+            system("pause");
+            break;
+            case 0:
             return 0;
             }};
     }
